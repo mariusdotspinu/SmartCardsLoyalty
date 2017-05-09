@@ -181,17 +181,17 @@ public class Wallet extends Applet {
 
         // it is an error if the number of data bytes
         // read does not match the number in Lc byte
-        if ((numBytes != 3) || (byteRead != 3)) {
+        if ((numBytes != 2) || (byteRead != 2)) {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
         }
 
         // get the credit amount
         byte creditAmountF = buffer[ISO7816.OFFSET_CDATA];
         byte creditAmountS = buffer[ISO7816.OFFSET_CDATA + 1];
-        byte creditAmountT = buffer[ISO7816.OFFSET_CDATA + 2];
         
         short creditAmount = 0;
-        creditAmount = (short) ((short)(creditAmountF * 256) | (short)(creditAmountS * 16) | (short)creditAmountT);
+        
+        creditAmount = (short)( (creditAmountF<<8) | (creditAmountS & 0xFF) );
 
         // check the credit amount
         if ((creditAmount > MAX_TRANSACTION_AMOUNT) || (creditAmount < 0)) {
@@ -219,7 +219,7 @@ public class Wallet extends Applet {
 
         byte numBytes = (buffer[ISO7816.OFFSET_LC]);
         
-        byte pointsAmountF, pointsAmountS, pointsAmountT, debitAmountF, debitAmountS, debitAmountT;
+        byte pointsAmountF, pointsAmountS, debitAmountF, debitAmountS;
         byte byteRead = (byte) (apdu.setIncomingAndReceive());
         
         
@@ -228,17 +228,15 @@ public class Wallet extends Applet {
         
         if(p1_money == P1_MONEY && p2_points == NONE){ //we want to pay using only money
 	
-	        if ((numBytes != 3) || (byteRead != 3)) {
+	        if ((numBytes != 2) || (byteRead != 2)) {
 	            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 	        }
-	
 
 	        debitAmountF = buffer[ISO7816.OFFSET_CDATA];
 	        debitAmountS = buffer[ISO7816.OFFSET_CDATA + 1];
-	        debitAmountT = buffer[ISO7816.OFFSET_CDATA + 2];
 	 
 	        short debitAmount = 0;
-	        debitAmount = (short) ((short)(debitAmountF * 256) | (short)(debitAmountS * 16) | (short)debitAmountT);
+	        debitAmount = (short)( (debitAmountF<<8) | (debitAmountS & 0xFF) );
 	        
 	        // check money amount
 	        if ((debitAmount > MAX_TRANSACTION_AMOUNT) || (debitAmount < 0)) {
@@ -257,17 +255,16 @@ public class Wallet extends Applet {
         else if (p1_money == NONE && p2_points == P2_POINTS){ //we want to pay using only points
         	
         	
-	        if ((numBytes != 3) || (byteRead != 3)) {
+	        if ((numBytes != 2) || (byteRead != 2)) {
 	            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 	        }
 	
 
 	        pointsAmountF = buffer[ISO7816.OFFSET_CDATA];
 	        pointsAmountS = buffer[ISO7816.OFFSET_CDATA + 1];
-	        pointsAmountT = buffer[ISO7816.OFFSET_CDATA + 2];
 	        
 	        short pointsAmount = 0;
-	        pointsAmount = (short) ((short)(pointsAmountF * 256) | (short)(pointsAmountS * 16) | (short)pointsAmountT);
+	        pointsAmount = (short)( (pointsAmountF<<8) | (pointsAmountS & 0xFF) );
 	        
 	        // check points amount
 	        if (pointsAmount < 0) {
@@ -285,22 +282,21 @@ public class Wallet extends Applet {
         
         else if(p1_money == P1_MONEY && p2_points == P2_POINTS){ //combination
 
-	        if ((numBytes != 6) || (byteRead != 6)) {
+	        if ((numBytes != 4) || (byteRead != 4)) {
 	            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 	        }
 	        
 	        debitAmountF = buffer[ISO7816.OFFSET_CDATA];
 	        debitAmountS = buffer[ISO7816.OFFSET_CDATA + 1];
-	        debitAmountT = buffer[ISO7816.OFFSET_CDATA + 2];
 	        
-	        pointsAmountF = buffer[ISO7816.OFFSET_CDATA + 3];
-	        pointsAmountS = buffer[ISO7816.OFFSET_CDATA + 4];
-	        pointsAmountT = buffer[ISO7816.OFFSET_CDATA + 5];
+	        pointsAmountF = buffer[ISO7816.OFFSET_CDATA + 2];
+	        pointsAmountS = buffer[ISO7816.OFFSET_CDATA + 3];
+
 	        
 	        short debitAmount = 0, pointsAmount = 0;
 	        
-	        debitAmount = (short) ((short)(debitAmountF * 256) | (short)(debitAmountS * 16) | (short)debitAmountT);
-	        pointsAmount = (short) ((short)(pointsAmountF * 256) | (short)(pointsAmountS * 16) | (short)pointsAmountT);
+	        debitAmount = (short)( (debitAmountF<<8) | (debitAmountS & 0xFF) );
+	        pointsAmount = (short)( (pointsAmountF<<8) | (pointsAmountS & 0xFF) );
 	        
 	        // check money amount
 	        if ((debitAmount > MAX_TRANSACTION_AMOUNT) || (debitAmount < 0)) {
